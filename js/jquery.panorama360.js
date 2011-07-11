@@ -1,12 +1,8 @@
-/* panorama360 - plugin for jQuery
+/*
+ * panorama360 - jQuery plugin made by Liviu Holhos
  * Copyright (c) 2011 Minimalistic Studio (http://minimalisticstudio.com/)
  * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
  * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
- * Thanks to: http://www.openstudio.fr for the initial idea.
- *
- * Some changes were made by:
- *  - Evgeny Likov (http://likov.spb.ru): fixed drag and kinetic scroll
- *  - cotko (https://github.com/cotko): added is360 option
  */
 (function($) {
 	$.fn.panorama360 = function(options){
@@ -37,7 +33,7 @@
 			var mouseXprev = 0;
 			var scrollDelta = 0;
 
-			if (settings.is360) viewportImage.removeAttr("usemap").css("left",0).clone().css("left",elem_width+"px").insertAfter(viewportImage);
+			if (settings.is360) viewportImage.height(elem_height).removeAttr("usemap").css("left",0).clone().css("left",elem_width+"px").insertAfter(viewportImage);
 
 			panoramaContainer.css({
 				'margin-left': '-'+settings.start_position+'px',
@@ -119,6 +115,14 @@
 					});
 					viewportImage.css("left",0).next().css("left",elem_width+"px");
 					if (image_map) repositionHotspots(image_areas,settings.image_height,elem_height,elem_width);
+				});
+			}
+
+			if (settings.callback && typeof settings.callback === 'function'){
+				var img = 0;
+				$('.panorama-container img').load(function(e){
+					img += 1;
+					if (img == 2) settings.callback();
 				});
 			}
 		});
