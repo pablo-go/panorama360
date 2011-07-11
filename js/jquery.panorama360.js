@@ -4,17 +4,20 @@
  * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
  * Thanks to: http://www.openstudio.fr for the initial idea.
  *
- * Some changes were made by Evgeny Likov (http://likov.spb.ru): fixed drag and kinetic scroll (thanks man!)
+ * Some changes were made by:
+ *  - Evgeny Likov (http://likov.spb.ru): fixed drag and kinetic scroll
+ *  - cotko (https://github.com/cotko): added is360 option
  */
 (function($) {
 	$.fn.panorama360 = function(options){
 		this.each(function(){
 			var settings = {
-				start_position: 0,
+				start_position: 0, // initial start position for the view
 				image_width: 0,
 				image_height: 0,
 				mouse_wheel_multiplier: 20,
-				bind_resize: true
+				bind_resize: true, // determine if window resize affects panorama viewport
+				is360: true // glue left and right and make it scrollable
 			};
 			if(options) $.extend(settings, options);
 			var viewport = $(this);
@@ -34,7 +37,7 @@
 			var mouseXprev = 0;
 			var scrollDelta = 0;
 
-			viewportImage.removeAttr("usemap").css("left",0).clone().css("left",elem_width+"px").insertAfter(viewportImage);
+			if (settings.is360) viewportImage.removeAttr("usemap").css("left",0).clone().css("left",elem_width+"px").insertAfter(viewportImage);
 
 			panoramaContainer.css({
 				'margin-left': '-'+settings.start_position+'px',
@@ -46,7 +49,7 @@
 				if (isDragged) return false;
 				scrollDelta = scrollDelta * 0.98;
 				if (Math.abs(scrollDelta)<=2) scrollDelta = 0;
-				scrollView(panoramaContainer, elem_width, scrollDelta);
+				scrollView(panoramaContainer, elem_width, scrollDelta,settings);
 			}, 1);
 			viewport.mousedown(function(e){
 				if (isDragged) return false;
@@ -64,13 +67,13 @@
 				if (!isDragged) return false;
 				scrollDelta = parseInt((e.clientX - mouseXprev));
 				mouseXprev = e.clientX;
-				scrollView(panoramaContainer, elem_width, scrollDelta);
+				scrollView(panoramaContainer, elem_width, scrollDelta,settings);
 				return false;
 			}).bind("mousewheel",function(e,distance){
 				var delta=Math.ceil(Math.sqrt(Math.abs(distance)));
 				delta=distance<0 ? -delta : delta;
 				scrollDelta = scrollDelta + delta * 5;
-				scrollView(panoramaContainer,elem_width,delta*settings.mouse_wheel_multiplier);
+				scrollView(panoramaContainer,elem_width,delta*settings.mouse_wheel_multiplier,settings);
 				return false;
 			}).bind('contextmenu',stopEvent).bind('touchstart', function(e){
 				if (isDragged) return false;
@@ -83,7 +86,7 @@
 				var touch_x = e.originalEvent.touches[0].pageX;
 				scrollDelta = parseInt((touch_x - mouseXprev));
 				mouseXprev = touch_x;
-				scrollView(panoramaContainer, elem_width, scrollDelta);
+				scrollView(panoramaContainer, elem_width, scrollDelta,settings);
 			}).bind('touchend', function(e){
 				isDragged = false;
 				scrollDelta = scrollDelta * 0.45;
@@ -119,16 +122,23 @@
 				});
 			}
 		});
-		
+
 		function stopEvent(e){
 			e.preventDefault();
 			return false;
 		}
 
-		function scrollView(panoramaContainer,elem_width,delta){
+		function scrollView(panoramaContainer,elem_width,delta,settings){
 			var newMarginLeft = parseInt(panoramaContainer.css('marginLeft'))+delta;
-			if (newMarginLeft > 0) newMarginLeft = -elem_width;
-			if (newMarginLeft < -elem_width) newMarginLeft = 0;
+			if(settings.is360){
+				if (newMarginLeft > 0) newMarginLeft = -elem_width;
+				if (newMarginLeft < -elem_width) newMarginLeft = 0;
+			}
+			else{
+				var right = (-elem_width>>2);
+				if (newMarginLeft > 0) newMarginLeft = 0;
+				if (newMarginLeft < right) newMarginLeft = right;
+			}
 			panoramaContainer.css('marginLeft', newMarginLeft+'px');
 		}
 
