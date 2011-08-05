@@ -139,7 +139,7 @@
 				if (newMarginLeft < -elem_width) newMarginLeft = 0;
 			}
 			else{
-				var right = (-elem_width>>2);
+				var right = -(elem_width - panoramaContainer.parent().width());
 				if (newMarginLeft > 0) newMarginLeft = 0;
 				if (newMarginLeft < right) newMarginLeft = right;
 			}
