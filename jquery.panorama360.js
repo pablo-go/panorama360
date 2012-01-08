@@ -97,7 +97,6 @@
 						case 'rect':
 							var area_coord = $(this).attr("coords").split(",");
 							var new_area = $(document.createElement('a')).addClass("area").attr("href",$(this).attr("href")).attr("title",$(this).attr("alt"));
-							new_area.addClass($(this).attr("class"));
 							panoramaContainer.append(new_area.data("stitch",1).data("coords",area_coord));
 							panoramaContainer.append(new_area.clone().data("stitch",2).data("coords",area_coord));
 							break;
@@ -122,11 +121,7 @@
 				});
 			}
 
-			if (settings.loaded && $.isFunction(loaded)) {
-				settings.loaded();
-			}
-
-			if (settings.callback && $.isFunction(settings.callback)) {
+			if (settings.callback && typeof settings.callback === 'function'){
 				var img = 0;
 				$('.panorama-container img').load(function(e){
 					img += 1;
